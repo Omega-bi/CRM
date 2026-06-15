@@ -17,7 +17,7 @@ test('workers settings page is displayed', function () {
         ->assertSee('Add');
 });
 
-test('workers settings page lists departments and positions', function () {
+test('workers settings page lists departments', function () {
     $this->actingAs(User::factory()->create());
 
     $department = Department::create([
@@ -37,7 +37,6 @@ test('workers settings page lists departments and positions', function () {
     Livewire::test('pages::settings.workers')
         ->assertSee('Company departments')
         ->assertSee('Production')
-        ->assertSee('Foreman')
         ->assertSee('Company staff')
         ->assertSee('Search');
 });
@@ -165,11 +164,18 @@ test('workers settings page can create a staff position', function () {
 test('workers settings page can create an employee', function () {
     $this->actingAs(User::factory()->create());
 
+    $department = Department::create([
+        'name' => 'Administration',
+        'sort_order' => 1,
+        'is_active' => true,
+    ]);
+
     Livewire::test('pages::settings.workers')
         ->set('full_name', 'Иван Петров')
         ->set('phone', '+7 700 111 22 33')
         ->set('email', 'ivan@example.com')
         ->set('position', 'Прораб')
+        ->set('employee_department_id', $department->id)
         ->call('createEmployee')
         ->assertHasNoErrors();
 
@@ -178,5 +184,63 @@ test('workers settings page can create an employee', function () {
         'phone' => '+7 700 111 22 33',
         'email' => 'ivan@example.com',
         'position' => 'Прораб',
+    ]);
+
+    $this->assertDatabaseHas('department_employee', [
+        'department_id' => $department->id,
+    ]);
+});
+
+test('workers settings page can edit an employee', function () {
+    $this->actingAs(User::factory()->create());
+
+    $department = Department::create([
+        'name' => 'Administration',
+        'sort_order' => 1,
+        'is_active' => true,
+    ]);
+
+    $staffPosition = StaffPosition::create([
+        'department_id' => $department->id,
+        'name' => 'Director',
+        'planned_count' => 1,
+        'sort_order' => 1,
+        'is_active' => true,
+    ]);
+
+    $employee = Employee::create([
+        'full_name' => 'Иван Петров',
+        'phone' => '+7 700 111 22 33',
+        'email' => 'ivan@example.com',
+        'position' => 'Прораб',
+        'staff_position_id' => $staffPosition->id,
+        'status' => EmployeeStatus::Active,
+    ]);
+
+    $employee->departments()->sync([$department->id]);
+
+    Livewire::test('pages::settings.workers')
+        ->call('editEmployee', $employee->id)
+        ->set('editing_employee_full_name', 'Иван Сергеев')
+        ->set('editing_employee_phone', '+7 700 999 88 77')
+        ->set('editing_employee_email', 'ivan.sergeev@example.com')
+        ->set('editing_employee_position', 'Начальник участка')
+        ->set('editing_employee_department_id', $department->id)
+        ->set('editing_employee_staff_position_id', $staffPosition->id)
+        ->call('updateEmployee')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('employees', [
+        'id' => $employee->id,
+        'full_name' => 'Иван Сергеев',
+        'phone' => '+7 700 999 88 77',
+        'email' => 'ivan.sergeev@example.com',
+        'position' => 'Начальник участка',
+        'staff_position_id' => $staffPosition->id,
+    ]);
+
+    $this->assertDatabaseHas('department_employee', [
+        'department_id' => $department->id,
+        'employee_id' => $employee->id,
     ]);
 });

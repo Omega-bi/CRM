@@ -23,16 +23,14 @@
         <flux:input wire:model="position" :label="__('Position')" type="text"
           placeholder="{{ __('Enter position') }}" icon-leading="briefcase"
           class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
-      </div>
 
-      <div class="mt-4">
-        <flux:select wire:model="employee_staff_position_id" :label="__('Staff position')"
+        <flux:select wire:model.live="employee_department_id" :label="__('Department')" required
           icon-leading="building-office"
           class="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35">
-          <option value="">{{ __('Select staff position') }}</option>
-          @foreach ($this->staffPositions as $staffPosition)
-            <option value="{{ $staffPosition->id }}">
-              {{ $staffPosition->department->name }} / {{ $staffPosition->name }}
+          <option value="">{{ __('Select department') }}</option>
+          @foreach ($this->departments as $department)
+            <option value="{{ $department->id }}">
+              {{ $department->name }}
             </option>
           @endforeach
         </flux:select>

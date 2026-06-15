@@ -23,8 +23,14 @@
       </button>
     </div>
 
+    @php
+      $rootDepartments = $this->departments->whereNull('parent_id');
+      $visibleRootDepartments = $this->show_all_departments ? $rootDepartments : $rootDepartments->take(4);
+      $hasMoreDepartments = $rootDepartments->count() > $visibleRootDepartments->count();
+    @endphp
+
     <div class="mt-6 space-y-4">
-      @forelse ($this->departments->whereNull('parent_id') as $department)
+      @forelse ($visibleRootDepartments as $department)
         @include('components.settings.workers.partials.department-tree-item', [
           'department' => $department,
           'level' => 0,
@@ -35,5 +41,14 @@
         </div>
       @endforelse
     </div>
+
+    @if ($hasMoreDepartments)
+      <div class="mt-4 flex justify-start">
+        <button type="button" wire:click="$set('show_all_departments', true)"
+          class="inline-flex items-center gap-2 text-sm font-medium text-[#013763] hover:underline">
+          <span>{{ __('Show more') }}</span>
+        </button>
+      </div>
+    @endif
   </div>
 </section>

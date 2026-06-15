@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Project;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -24,6 +25,7 @@ new #[Title('Workers settings')] class extends Component {
   public array $department_employee_ids = [];
   public string $department_employee_search = '';
   public string $editing_department_employee_search = '';
+  public bool $show_all_departments = false;
   public ?int $editing_department_id = null;
   public string $editing_department_name = '';
   public string $editing_department_sort_order = '0';
@@ -41,7 +43,16 @@ new #[Title('Workers settings')] class extends Component {
   public string $phone = '';
   public string $email = '';
   public string $position = '';
-  public ?int $employee_staff_position_id = null;
+  public ?int $employee_department_id = null;
+
+  public ?int $editing_employee_id = null;
+  public string $editing_employee_full_name = '';
+  public string $editing_employee_phone = '';
+  public string $editing_employee_email = '';
+  public string $editing_employee_position = '';
+  public ?int $editing_employee_department_id = null;
+  public ?int $editing_employee_staff_position_id = null;
+  public array $editing_employee_project_ids = [];
 
   #[Computed]
   public function departments(): Collection
@@ -50,10 +61,6 @@ new #[Title('Workers settings')] class extends Component {
       $query
         ->select(['id', 'parent_id', 'name', 'sort_order', 'is_active', 'created_at'])
         ->with([
-          'positions' => fn($childQuery) => $childQuery
-            ->select(['id', 'department_id', 'name', 'planned_count', 'sort_order', 'is_active', 'created_at'])
-            ->orderBy('sort_order')
-            ->orderBy('name'),
           'employees:id,full_name,email',
           'children' => $loadChildren,
         ])
@@ -64,10 +71,6 @@ new #[Title('Workers settings')] class extends Component {
     return Department::query()
       ->select(['id', 'parent_id', 'name', 'sort_order', 'is_active', 'created_at'])
       ->with([
-        'positions' => fn($query) => $query
-          ->select(['id', 'department_id', 'name', 'planned_count', 'sort_order', 'is_active', 'created_at'])
-          ->orderBy('sort_order')
-          ->orderBy('name'),
         'employees:id,full_name,email',
         'children' => $loadChildren,
       ])
@@ -313,22 +316,173 @@ new #[Title('Workers settings')] class extends Component {
       'phone' => ['nullable', 'string', 'max:255'],
       'email' => ['nullable', 'email', 'max:255'],
       'position' => ['nullable', 'string', 'max:255'],
-      'employee_staff_position_id' => ['nullable', 'integer', 'exists:organization_staff_positions,id'],
+      'employee_department_id' => ['required', 'integer', 'exists:organization_departments,id'],
     ]);
 
-    $createEmployee->handle([
+    $employee = $createEmployee->handle([
       'full_name' => $validated['full_name'],
       'phone' => $validated['phone'] ?? null,
       'email' => $validated['email'] ?? null,
       'position' => $validated['position'] ?? null,
-      'staff_position_id' => $validated['employee_staff_position_id'] ?? null,
       'status' => EmployeeStatus::Active,
     ]);
 
+    $employee->departments()->sync([$validated['employee_department_id']]);
+
     $this->dispatch('close-modal', name: 'create-employee');
-    $this->reset('full_name', 'phone', 'email', 'position', 'employee_staff_position_id');
+    $this->reset(
+      'full_name',
+      'phone',
+      'email',
+      'position',
+      'employee_department_id',
+    );
 
     Flux::toast(variant: 'success', text: __('Employee created.'));
+  }
+
+  #[Computed]
+  public function editingEmployeeStaffPositions(): Collection
+  {
+    return StaffPosition::query()
+      ->select(['id', 'department_id', 'name', 'planned_count', 'is_active'])
+      ->with('department:id,name')
+      ->when($this->editing_employee_department_id !== null, function ($query): void {
+        $query->where('department_id', $this->editing_employee_department_id);
+      })
+      ->orderBy('name')
+      ->get();
+  }
+
+  #[Computed]
+  public function workspaceProjects(): Collection
+  {
+    $workspace = auth()->user()?->currentWorkspace;
+
+    if ($workspace === null) {
+      return collect();
+    }
+
+    return Project::query()
+      ->select(['id', 'workspace_id', 'name'])
+      ->where('workspace_id', $workspace->id)
+      ->orderBy('name')
+      ->get();
+  }
+
+  public function editEmployee(int $employeeId): void
+  {
+    $employee = Employee::query()
+      ->with([
+        'departments:id,name',
+        'staffPosition:id,department_id,name',
+        'staffPosition.department:id,name',
+        'user:id,name,email',
+      ])
+      ->findOrFail($employeeId);
+
+    $this->editing_employee_id = $employee->id;
+    $this->editing_employee_full_name = $employee->full_name;
+    $this->editing_employee_phone = $employee->phone ?? '';
+    $this->editing_employee_email = $employee->email ?? '';
+    $this->editing_employee_position = $employee->position ?? '';
+    $this->editing_employee_department_id = $employee->departments->first()?->id
+      ?? $employee->staffPosition?->department_id;
+    $this->editing_employee_staff_position_id = $employee->staff_position_id;
+    $this->editing_employee_project_ids = $employee->user_id === null
+      ? []
+      : Project::query()
+        ->select(['id', 'workspace_id', 'name'])
+        ->where('workspace_id', auth()->user()?->currentWorkspace?->id)
+        ->whereHas('members', function ($query) use ($employee): void {
+          $query->whereKey($employee->user_id);
+        })
+        ->pluck('id')
+        ->map(fn($projectId): int => (int) $projectId)
+        ->all();
+
+    $this->dispatch('modal-show', name: 'edit-employee');
+  }
+
+  public function updateEmployee(): void
+  {
+    $validated = $this->validate([
+      'editing_employee_id' => ['required', 'integer', 'exists:employees,id'],
+      'editing_employee_full_name' => ['required', 'string', 'max:255'],
+      'editing_employee_phone' => ['nullable', 'string', 'max:255'],
+      'editing_employee_email' => ['nullable', 'email', 'max:255'],
+      'editing_employee_position' => ['nullable', 'string', 'max:255'],
+      'editing_employee_department_id' => ['required', 'integer', 'exists:organization_departments,id'],
+      'editing_employee_staff_position_id' => ['nullable', 'integer', 'exists:organization_staff_positions,id'],
+      'editing_employee_project_ids' => ['array'],
+      'editing_employee_project_ids.*' => ['integer', 'exists:projects,id'],
+    ]);
+
+    $employee = Employee::query()->findOrFail($validated['editing_employee_id']);
+
+    $employee->update([
+      'full_name' => $validated['editing_employee_full_name'],
+      'phone' => $validated['editing_employee_phone'] ?? null,
+      'email' => $validated['editing_employee_email'] ?? null,
+      'position' => $validated['editing_employee_position'] ?? null,
+      'staff_position_id' => $validated['editing_employee_staff_position_id'] ?? null,
+    ]);
+
+    $employee->departments()->sync([$validated['editing_employee_department_id']]);
+
+    if ($employee->user_id !== null) {
+      $workspace = auth()->user()?->currentWorkspace;
+      $selectedProjectIds = array_map('intval', $validated['editing_employee_project_ids'] ?? []);
+
+      if ($workspace !== null) {
+        $currentProjectIds = Project::query()
+          ->select(['id'])
+          ->where('workspace_id', $workspace->id)
+          ->whereHas('members', function ($query) use ($employee): void {
+            $query->whereKey($employee->user_id);
+          })
+          ->pluck('id')
+          ->map(fn($projectId): int => (int) $projectId)
+          ->all();
+
+        Project::query()
+          ->select(['id'])
+          ->whereIn('id', $currentProjectIds)
+          ->whereNotIn('id', $selectedProjectIds)
+          ->get()
+          ->each(function (Project $project) use ($employee): void {
+            $project->members()->detach($employee->user_id);
+          });
+
+        Project::query()
+          ->select(['id', 'workspace_id'])
+          ->whereIn('id', $selectedProjectIds)
+          ->where('workspace_id', $workspace->id)
+          ->get()
+          ->each(function (Project $project) use ($employee, $workspace): void {
+            $project->members()->syncWithoutDetaching([
+              $employee->user_id => [
+                'workspace_id' => $workspace->id,
+                'role' => 'member',
+              ],
+            ]);
+          });
+      }
+    }
+
+    $this->dispatch('close-modal', name: 'edit-employee');
+    $this->reset(
+      'editing_employee_id',
+      'editing_employee_full_name',
+      'editing_employee_phone',
+      'editing_employee_email',
+      'editing_employee_position',
+      'editing_employee_department_id',
+      'editing_employee_staff_position_id',
+      'editing_employee_project_ids',
+    );
+
+    Flux::toast(variant: 'success', text: __('Employee updated.'));
   }
 }; ?>
 
@@ -352,5 +506,7 @@ new #[Title('Workers settings')] class extends Component {
 @include('components.settings.workers.modals.edit-department')
 
 @include('components.settings.workers.modals.create-staff-position')
+
+@include('components.settings.workers.modals.edit-employee')
   </x-pages::settings.layout>
 </section>

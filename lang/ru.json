@@ -130,5 +130,9 @@
      "Enter phone number": "Введите номер телефона",
      "Enter email address": "Введите адрес электронной почты",
      "Enter position": "Введите название должности",
-     "Select staff position": "Выберите штатную должность"
+     "Select staff position": "Выберите штатную должность",
+     "Photo": "Фото",
+     "Avatar preview": "Предпросмотр аватара",
+     "Projects": "Проекты",
+     "No projects": "Нет проектов"
 }

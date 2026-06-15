@@ -68,7 +68,7 @@
           $displayDepartment = $worker->departments->first()?->name ?: $worker->staffPosition?->department?->name ?: '';
         @endphp
 
-          <tr class="transition-colors hover:bg-[#f5f8ff]">
+          <tr wire:click="editEmployee({{ $worker->id }})" class="cursor-pointer transition-colors hover:bg-[#f5f8ff]">
             <td class="px-4 py-3 align-middle">
               <div class="flex items-center gap-2">
                 <div class="flex h-5 w-5 items-center justify-center rounded-full text-[#3498db]">

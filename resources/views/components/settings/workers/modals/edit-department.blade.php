@@ -1,3 +1,7 @@
+@php
+  $editingDepartmentWorkers = $this->editingDepartmentWorkers;
+@endphp
+
 <flux:modal name="edit-department" focusable class="max-w-none"
   style="width: 924px; max-width: calc(100vw - 40px); height: 850px; max-height: calc(100vh - 20px);">
   <div class="flex h-full flex-col">
@@ -34,9 +38,9 @@
           placeholder="{{ __('Search by list (name, department, position)') }}" icon-leading="magnifying-glass" />
       </div>
 
-      <div class="mt-5 min-h-0 flex-1 overflow-x-auto">
+      <div class="mt-5 h-[520px] max-h-[calc(100vh-280px)] min-h-0 overflow-auto rounded-md border border-zinc-100 dark:border-zinc-800">
         <table class="w-full text-sm">
-          <thead>
+          <thead class="sticky top-0 z-10 bg-white dark:bg-zinc-950">
             <tr class="text-left text-[9px] text-zinc-400">
               <th class="w-10 px-4 py-3">
                 {{ __('Select') }}
@@ -49,7 +53,7 @@
           </thead>
 
           <tbody>
-            @foreach ($this->editingDepartmentWorkers as $worker)
+            @foreach ($editingDepartmentWorkers as $worker)
               <tr>
                 <td class="px-4 py-4">
                   <input type="checkbox" wire:model="editing_department_employee_ids" value="{{ $worker->id }}"
@@ -81,6 +85,7 @@
                 </td>
               </tr>
             @endforeach
+
           </tbody>
         </table>
       </div>

@@ -1,14 +1,24 @@
 
-<section class="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 p-4">
-  <div class="flex items-start justify-between gap-4 py-4">
+<section class="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900"
+  x-data="{ draggedDepartmentId: null, draggedDepartmentName: '', dropDepartmentId: null, dragX: 0, dragY: 0 }"
+  x-on:dragover.window="dragX = $event.clientX; dragY = $event.clientY">
+  <div
+    class="pointer-events-none fixed z-[9999] flex max-w-72 items-center gap-2 rounded-md border border-[#1f8fff] bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-lg dark:border-[#4aa3ff] dark:bg-zinc-800 dark:text-zinc-50"
+    x-show="draggedDepartmentId"
+    x-cloak
+    x-bind:style="`left: ${dragX + 14}px; top: ${dragY + 14}px`">
+    <flux:icon name="bars-3" class="size-4 shrink-0 text-[#1f8fff]" />
+    <span class="truncate" x-text="draggedDepartmentName"></span>
+  </div>
+  <div class="shrink-0 flex items-start justify-between gap-4 py-4">
     <div>
-      <flux:heading size="lg">{{ __('Company departments') }}</flux:heading>
+      <flux:heading size="lg">{{ __('Company structure') }}</flux:heading>
     </div>
 
     <flux:button variant="ghost" size="xs" icon="question-mark-circle" class="text-[#ff8a00]" />
   </div>
 
-  <div class="pb-3 mt-6">
+  <div class="mt-6 pb-3">
     <div class="flex items-center justify-between gap-4 text-sm">
       <flux:modal.trigger name="create-company-structure">
         <button type="button" class="inline-flex items-center gap-2 text-[#013763] hover:underline">
@@ -25,7 +35,7 @@
 
     @php
       $rootDepartments = $this->departments->whereNull('parent_id');
-      $visibleRootDepartments = $this->show_all_departments ? $rootDepartments : $rootDepartments->take(4);
+      $visibleRootDepartments = $this->show_all_departments ? $rootDepartments : $rootDepartments->take(3);
       $hasMoreDepartments = $rootDepartments->count() > $visibleRootDepartments->count();
     @endphp
 
@@ -44,7 +54,7 @@
 
     @if ($hasMoreDepartments)
       <div class="mt-4 flex justify-start">
-        <button type="button" wire:click="$set('show_all_departments', true)"
+        <button type="button" wire:click="showAllDepartments"
           class="inline-flex items-center gap-2 text-sm font-medium text-[#013763] hover:underline">
           <span>{{ __('Show more') }}</span>
         </button>

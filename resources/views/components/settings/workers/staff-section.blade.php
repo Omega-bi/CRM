@@ -1,14 +1,19 @@
+@php
+  $workers = $this->workers;
+  $workersTotal = $this->workersTotal;
+@endphp
+
 <section class="mt-3 rounded-lg border border-[#e4e7ec] bg-white p-4">
-  <div class="flex items-start justify-between gap-4 py-2">
+  <div class="shrink-0 flex items-start justify-between gap-4 py-2">
     <div>
       <flux:heading size="lg" class="text-[#121b2e] font-semibold">{{ __('Company staff') }}
-        ({{ $this->workers->count() }})</flux:heading>
+        ({{ $workersTotal }})</flux:heading>
     </div>
 
     <flux:button variant="ghost" size="xs" icon="question-mark-circle" class="text-[#f78f08]" />
   </div>
 
-  <div class="pb-3 mt-4">
+  <div class="shrink-0 pb-3 mt-4">
     <div class="flex flex-wrap items-center gap-4 text-sm justify-between sm:flex">
       <flux:modal.trigger name="create-employee">
         <button type="button" class="inline-flex items-center gap-2 text-[#4a7fd9] hover:underline">
@@ -37,9 +42,9 @@
     </div>
   </div>
 
-  <div class="mt-4 overflow-x-auto">
+  <div class="mt-4 max-h-[420px] overflow-auto lg:max-h-[calc(100vh-260px)]">
     <table class="w-full min-w-full table-auto">
-      <thead>
+      <thead class="sticky top-0 z-10 bg-white">
         <tr class="text-left">
           <th class="px-4 py-2 text-[10px] font-normal uppercase tracking-wide text-[#a0a8b3]">
             {{ __('Name') }}
@@ -60,7 +65,7 @@
       </thead>
 
       <tbody>
-      @forelse ($this->workers as $worker)
+      @forelse ($workers as $worker)
         @php
           $displayName = $worker->full_name ?: ($worker->user?->email ?: $worker->email);
           $displayEmail = $worker->email ?: ($worker->user?->email ?: '—');
@@ -75,7 +80,7 @@
                   <flux:icon name="user-circle" class="size-5" />
                 </div>
 
-                <span class="text-xs font-normal text-[#a2a7ba]">
+                <span class="text-sm font-normal">
                   {{ $displayName }}
                 </span>
 
@@ -85,25 +90,41 @@
               </div>
             </td>
 
-            <td class="px-4 py-3 align-middle text-xs font-normal text-[#a5abb8]">
+            <td class="px-4 py-3 align-middle text-sm font-normal">
               {{ $displayEmail }}
             </td>
 
-            <td class="px-4 py-3 align-middle text-xs text-[#a5abb8]">
+            <td class="px-4 py-3 align-middle text-sm">
               {{ $displayPosition }}
             </td>
 
-            <td class="px-4 py-3 align-middle text-xs text-[#9ea5ba]">
+            <td class="px-4 py-3 align-middle text-sm">
               {{ $displayDepartment }}
             </td>
           </tr>
         @empty
           <tr>
-            <td colspan="4" class="px-4 py-8 text-center text-xs text-[#a0a8b3]">
+            <td colspan="4" class="px-4 py-8 text-center text-sm">
               {{ __('No workers yet') }}
             </td>
           </tr>
         @endforelse
+
+        @if ($workersTotal > $this->workers_per_page)
+          <tr>
+            <td colspan="4" class="px-4 py-4">
+              <x-settings.workers.partials.pagination
+                :current-page="$this->workers_page"
+                :total="$workersTotal"
+                :per-page="$this->workers_per_page"
+                set-page-action="setWorkersPage"
+                previous-action="previousWorkersPage"
+                next-action="nextWorkersPage"
+                loading-target="setWorkersPage, previousWorkersPage, nextWorkersPage"
+              />
+            </td>
+          </tr>
+        @endif
       </tbody>
     </table>
   </div>

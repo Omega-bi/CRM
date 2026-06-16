@@ -1,4 +1,3 @@
-
 <flux:modal name="create-employee" :show="$errors->isNotEmpty()" focusable class="max-w-none"
   style="width: 440px; max-width: calc(100vw - 40px);">
   <div class="flex h-full flex-col">
@@ -12,16 +11,12 @@
           placeholder="{{ __('Enter full name') }}" icon-leading="user"
           class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
 
-        <flux:input wire:model="phone" :label="__('Phone')" type="text"
-          placeholder="{{ __('Enter phone number') }}" icon-leading="phone"
+        <flux:input wire:model="phone" :label="__('Phone')" type="text" placeholder="{{ __('Enter phone number') }}"
+          icon-leading="phone"
           class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
 
-        <flux:input wire:model="email" :label="__('Email')" type="email"
-          placeholder="{{ __('Enter email address') }}" icon-leading="envelope"
-          class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
-
-        <flux:input wire:model="position" :label="__('Position')" type="text"
-          placeholder="{{ __('Enter position') }}" icon-leading="briefcase"
+        <flux:input wire:model="email" :label="__('Email')" type="email" placeholder="{{ __('Enter email address') }}"
+          icon-leading="envelope"
           class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
 
         <flux:select wire:model.live="employee_department_id" :label="__('Department')" required
@@ -31,6 +26,19 @@
           @foreach ($this->departments as $department)
             <option value="{{ $department->id }}">
               {{ $department->name }}
+            </option>
+          @endforeach
+        </flux:select>
+        <flux:select wire:model.live="employee_staff_position_id"
+          wire:key="create-employee-staff-position-{{ $this->employee_department_id ?? 'all' }}" :label="__('Position')"
+          icon-leading="briefcase"
+          class="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35">
+          <option value="">{{ __('Select staff position') }}</option>
+          @foreach ($this->employeeStaffPositions as $staffPosition)
+            <option value="{{ $staffPosition->id }}">
+              {{ $staffPosition->name }}@if ($this->employee_department_id === null && $staffPosition->department)
+                ({{ $staffPosition->department->name }})
+              @endif
             </option>
           @endforeach
         </flux:select>

@@ -6,8 +6,8 @@
 @endphp
 
 <flux:modal name="edit-employee" focusable class="max-w-none"
-  style="width: 460px; max-width: calc(100vw - 28px);">
-  <form wire:submit="updateEmployee" class="-m-6 flex max-h-[520px] min-h-[520px] flex-col overflow-hidden rounded-lg bg-white text-zinc-700 dark:bg-zinc-950 dark:text-zinc-200">
+  style="width: 760px; max-width: calc(100vw - 32px);">
+  <form wire:submit="updateEmployee" class="-m-6 flex max-h-[680px] min-h-[560px] flex-col overflow-hidden rounded-lg bg-white text-zinc-700 dark:bg-zinc-950 dark:text-zinc-200">
     <div class="flex h-[60px] shrink-0 items-center justify-between border-b border-zinc-200 px-6 dark:border-zinc-800">
       <div class="min-w-0 truncate text-xl font-medium text-slate-500 dark:text-slate-300">
         {{ $this->editing_employee_email ?: $this->editing_employee_full_name }}
@@ -96,7 +96,7 @@
         <h3 class="text-lg font-semibold text-zinc-800 dark:text-zinc-100">{{ __('Departments membership') }}:</h3>
 
         <div class="mt-4 h-[168px] overflow-y-auto pr-1">
-          <div class="grid grid-cols-[1fr_140px] gap-x-4 gap-y-2 text-sm">
+          <div class="grid grid-cols-[minmax(0,1fr)_220px] gap-x-4 gap-y-2 text-sm">
             <div class="sticky top-0 z-10 bg-white pb-1 pl-6 text-xs text-slate-300 dark:bg-zinc-950">
               {{ __('Department name') }}
             </div>
@@ -112,14 +112,13 @@
               </label>
 
               @if ((int) $this->editing_employee_department_id === (int) $department->id)
-                <select wire:model.live="editing_employee_staff_position_id"
+                <x-ui.select
                   wire:key="editing-employee-staff-position-{{ $this->editing_employee_department_id }}"
-                  class="h-7 appearance-none rounded-none border-0 border-b border-slate-200 bg-transparent px-1 py-0 text-sm text-[#1f8fff] shadow-none outline-none transition focus:border-[#1f8fff] focus:outline-none focus:ring-0 dark:border-zinc-700 dark:focus:border-[#1f8fff]">
-                  <option value="">{{ __('Not set') }}</option>
-                  @foreach ($this->editingEmployeeStaffPositions as $staffPosition)
-                    <option value="{{ $staffPosition->id }}">{{ $staffPosition->name }}</option>
-                  @endforeach
-                </select>
+                  model="editing_employee_staff_position_id"
+                  :value="$editing_employee_staff_position_id"
+                  :options="$this->editingEmployeeStaffPositions->pluck('name', 'id')->prepend(__('Not set'), '')->all()"
+                  size="xs"
+                />
               @else
                 <span class="text-sm text-slate-400">{{ __('Not set') }}</span>
               @endif

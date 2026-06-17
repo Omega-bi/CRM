@@ -19,15 +19,15 @@
         </div>
 
         <div style="flex: 1 1 0; min-width: 0;">
-          <flux:select wire:model="department_parent_id" :label="__('Parent department')" class="h-[42px]">
-            <option value="">{{ __('No parent department') }}</option>
-
-            @foreach ($this->departments as $department)
-              <option value="{{ $department->id }}">
-                {{ $department->parent_id ? '— ' : '' }}{{ $department->name }}
-              </option>
-            @endforeach
-          </flux:select>
+          <x-ui.select
+            model="department_parent_id"
+            :value="$department_parent_id"
+            :label="__('Parent department')"
+            :options="$this->departments
+              ->mapWithKeys(fn ($department) => [$department->id => ($department->parent_id ? '— ' : '').$department->name])
+              ->prepend(__('No parent department'), '')
+              ->all()"
+          />
         </div>
       </div>
 

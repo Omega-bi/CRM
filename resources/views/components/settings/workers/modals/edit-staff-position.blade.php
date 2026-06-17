@@ -8,24 +8,27 @@
 
     <form wire:submit="updateStaffPosition" class="flex h-full min-h-0 flex-col">
       <div class="flex flex-col gap-4">
-        <flux:select wire:model="editing_staff_position_department_id" :label="__('Department')" required
-          icon-leading="building-office"
-          class="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35">
-          <option value="">{{ __('Select department') }}</option>
-          @foreach ($this->departments as $department)
-            <option value="{{ $department->id }}">{{ $department->name }}</option>
-          @endforeach
-        </flux:select>
+        <x-ui.select
+          model="editing_staff_position_department_id"
+          :value="$editing_staff_position_department_id"
+          :label="__('Department')"
+          :options="$this->departments->pluck('name', 'id')->prepend(__('Select department'), '')->all()"
+          required
+        />
 
         <flux:input wire:model="editing_staff_position_name" :label="__('Position name')" type="text" required
           icon-leading="briefcase"
           class:input="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
 
-        <flux:select wire:model="editing_staff_position_is_active" :label="__('Status')"
-          class="h-[42px] focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35">
-          <option value="1">{{ __('Active') }}</option>
-          <option value="0">{{ __('Inactive') }}</option>
-        </flux:select>
+        <x-ui.select
+          model="editing_staff_position_is_active"
+          :value="$editing_staff_position_is_active"
+          :label="__('Status')"
+          :options="[
+            '1' => __('Active'),
+            '0' => __('Inactive'),
+          ]"
+        />
       </div>
 
       <div class="flex justify-end gap-2 pt-6 mt-6">

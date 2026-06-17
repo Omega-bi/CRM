@@ -39,7 +39,7 @@ test('workspace switcher prompts creation when user has no workspace', function 
         ->assertDontSee(__('Choose workspace'));
 });
 
-test('workspace switcher prompts selection when user has a workspace', function () {
+test('workspace switcher shows current workspace when user has a workspace', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -51,7 +51,27 @@ test('workspace switcher prompts selection when user has a workspace', function 
         ->assertSeeHtml('data-test="workspace-switcher-trigger"')
         ->assertSeeInOrder([
             'data-test="workspace-switcher-trigger"',
-            __('Choose workspace'),
+            $user->currentWorkspace->name,
         ], false)
+        ->assertDontSee(__('Choose workspace'))
         ->assertSee(__('Create workspace'));
+});
+
+test('workspace switcher selects a fallback workspace when current workspace is missing', function () {
+    $user = User::factory()->create();
+    $workspaceName = $user->currentWorkspace->name;
+
+    $user->forceFill(['current_workspace_id' => null])->save();
+
+    $response = $this
+        ->actingAs($user->fresh())
+        ->get(route('dashboard'));
+
+    $response
+        ->assertOk()
+        ->assertSeeHtml('data-test="workspace-switcher-trigger"')
+        ->assertSee($workspaceName)
+        ->assertDontSee(__('Choose workspace'));
+
+    expect($user->fresh()->currentWorkspace?->name)->toBe($workspaceName);
 });

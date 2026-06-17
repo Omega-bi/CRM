@@ -3,8 +3,14 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-zinc-50">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-white">
+    @php
+        $pageHeading = request()->is('settings*')
+            ? __('Settings')
+            : ($title ?? __('Dashboard'));
+    @endphp
+
+    <body class="min-h-screen bg-zinc-50 dark:bg-black">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -35,13 +41,29 @@
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
-        <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
+        <flux:header class="h-12 gap-3 border-b border-zinc-200 bg-white px-6 lg:px-8 dark:border-zinc-800 dark:bg-black">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+
+            <h1 class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ $pageHeading }}
+            </h1>
 
             <flux:spacer />
 
-            <flux:dropdown position="top" align="end">
+            <livewire:language-switcher />
+
+            <button
+                type="button"
+                x-data
+                x-on:click="$flux.appearance = $flux.dark ? 'light' : 'dark'"
+                class="inline-flex h-12 w-12 cursor-pointer items-center justify-center text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-950 dark:hover:text-white"
+                :aria-label="$flux.dark ? @js(__('Light')) : @js(__('Dark'))"
+            >
+                <flux:icon.sun x-show="$flux.dark" x-cloak class="size-5" />
+                <flux:icon.moon x-show="! $flux.dark" x-cloak class="size-5" />
+            </button>
+
+            <flux:dropdown position="top" align="end" class="lg:hidden">
                 <flux:profile
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevron-down"

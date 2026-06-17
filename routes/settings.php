@@ -15,6 +15,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('settings/workers', 'pages::settings.workers')->name('workers.index');
 
+    Route::livewire('settings/roles', 'pages::settings.roles')->name('roles.index');
+
     Route::livewire('settings/security', 'pages::settings.security')
         ->middleware(
             when(

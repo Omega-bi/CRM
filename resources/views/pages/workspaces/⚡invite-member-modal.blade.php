@@ -68,11 +68,13 @@ new class extends Component {
         <div class="space-y-4">
             <flux:input wire:model="inviteEmail" type="email" :label="__('Email address')" required data-test="invite-email" />
 
-            <flux:select wire:model="inviteRole" :label="__('Role')" data-test="invite-role">
-                @foreach ($this->availableRoles as $role)
-                    <flux:select.option value="{{ $role['value'] }}">{{ $role['label'] }}</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-ui.select
+                model="inviteRole"
+                :value="$inviteRole"
+                :label="__('Role')"
+                :options="collect($this->availableRoles)->mapWithKeys(fn ($role) => [$role['value'] => $role['label']])->all()"
+                data-test="invite-role"
+            />
         </div>
 
         <div class="flex justify-end space-x-2 rtl:space-x-reverse">

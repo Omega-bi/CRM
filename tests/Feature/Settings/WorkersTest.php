@@ -16,7 +16,8 @@ test('workers settings page is displayed', function () {
 
     $this->get(route('workers.index'))
         ->assertOk()
-        ->assertSee('Company departments')
+        ->assertSee('Settings')
+        ->assertSee('Company structure')
         ->assertSee('Company staff')
         ->assertSee('Add');
 });
@@ -39,7 +40,7 @@ test('workers settings page lists departments', function () {
     ]);
 
     Livewire::test('pages::settings.workers')
-        ->assertSee('Company departments')
+        ->assertSee('Company structure')
         ->assertSee('Production')
         ->assertSee('Company staff')
         ->assertSee('Search');
@@ -117,7 +118,7 @@ test('workers settings page lists employees', function () {
     ]);
 
     Livewire::test('pages::settings.workers')
-        ->assertSee('Company departments')
+        ->assertSee('Company structure')
         ->assertSee('Алибек Нуртаев')
         ->assertSee('Production')
         ->assertSee('Foreman');

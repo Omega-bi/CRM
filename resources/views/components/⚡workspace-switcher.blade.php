@@ -7,6 +7,21 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 new class extends Component {
+  public function mount(): void
+  {
+    $user = Auth::user();
+
+    if ($user->currentWorkspace || $user->workspaces()->doesntExist()) {
+      return;
+    }
+
+    $fallbackWorkspace = $user->fallbackWorkspace();
+
+    if ($fallbackWorkspace) {
+      $user->switchWorkspace($fallbackWorkspace);
+    }
+  }
+
   public function currentWorkspace(): ?array
   {
     $workspace = Auth::user()->currentWorkspace;
@@ -28,7 +43,9 @@ new class extends Component {
 
   public function triggerLabel(): string
   {
-    return __('Choose workspace');
+    return $this->currentWorkspace()['name']
+      ?? $this->workspaces()->first()?->name
+      ?? __('Choose workspace');
   }
 
   public function switchWorkspace(string $slug): void

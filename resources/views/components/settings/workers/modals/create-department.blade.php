@@ -12,11 +12,15 @@
     <div class="grid grid-cols-2 gap-4">
       <flux:input wire:model="department_sort_order" :label="__('Sort order')" type="number" min="0"
         class:input="focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35" />
-      <flux:select wire:model="department_is_active" :label="__('Status')"
-        class="focus:ring-1 focus:ring-inset focus:ring-[#013763]/20 focus:border-[#013763]/35">
-        <option value="1">{{ __('Active') }}</option>
-        <option value="0">{{ __('Inactive') }}</option>
-      </flux:select>
+      <x-ui.select
+        model="department_is_active"
+        :value="$department_is_active"
+        :label="__('Status')"
+        :options="[
+          '1' => __('Active'),
+          '0' => __('Inactive'),
+        ]"
+      />
     </div>
 
     <div class="flex justify-end gap-2">

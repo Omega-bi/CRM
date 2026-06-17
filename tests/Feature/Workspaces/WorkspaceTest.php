@@ -61,6 +61,11 @@ test('workspace edit page can be rendered', function () {
         ->get(route('workspaces.edit', $workspace));
 
     $response->assertOk();
+
+    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+        ->assertSeeHtml('data-test="workspace-name-input"')
+        ->assertSeeHtml('data-test="invite-member-button"')
+        ->assertSeeHtml('data-test="workspace-save-button"');
 });
 
 test('workspaces can be updated by owners', function () {

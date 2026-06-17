@@ -13,6 +13,7 @@ class AssignProjectRole
     {
         abort_unless($role->scope === RoleScope::Project, 422);
         abort_unless($role->project_id === null || $role->project_id === $project->id, 422);
+        abort_unless($role->workspace_id === null || $role->workspace_id === $project->workspace_id, 422);
 
         $project->memberships()
             ->where('user_id', $user->id)

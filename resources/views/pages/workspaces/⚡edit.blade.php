@@ -4,14 +4,18 @@ use App\Data\WorkspacePermissions;
 use App\Enums\WorkspaceRole;
 use App\Models\Workspace;
 use App\Models\User;
+use App\Notifications\Workspaces\WorkspaceInvitation as WorkspaceInvitationNotification;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Modules\Workspace\Rules\UniqueWorkspaceInvitation;
 use Modules\Workspace\Rules\WorkspaceName;
 
 new class extends Component
@@ -33,6 +37,12 @@ new class extends Component
     public ?string $existingUserId = null;
 
     public string $existingUserRole = 'member';
+
+    public string $inviteEmail = '';
+
+    public string $inviteRole = 'member';
+
+    public string $memberSearch = '';
 
     public function mount(Workspace $workspace): void
     {
@@ -114,9 +124,37 @@ new class extends Component
 
         $this->populateWorkspaceData();
 
-        $this->dispatch('close-modal', name: 'add-existing-member');
-
         Flux::toast(variant: 'success', text: __('Member added.'));
+    }
+
+    public function createInvitation(): void
+    {
+        Gate::authorize('inviteMember', $this->workspaceModel);
+
+        $validated = Validator::make([
+            'inviteEmail' => $this->inviteEmail,
+            'inviteRole' => $this->inviteRole,
+        ], [
+            'inviteEmail' => ['required', 'string', 'email', 'max:255', new UniqueWorkspaceInvitation($this->workspaceModel)],
+            'inviteRole' => ['required', 'string', Rule::enum(WorkspaceRole::class)],
+        ])->validate();
+
+        $invitation = $this->workspaceModel->invitations()->create([
+            'email' => $validated['inviteEmail'],
+            'role' => WorkspaceRole::from($validated['inviteRole']),
+            'invited_by' => Auth::id(),
+            'expires_at' => now()->addDays(3),
+        ]);
+
+        Notification::route('mail', $invitation->email)
+            ->notify(new WorkspaceInvitationNotification($invitation));
+
+        $this->inviteEmail = '';
+        $this->inviteRole = WorkspaceRole::Member->value;
+
+        $this->populateWorkspaceData();
+
+        Flux::toast(variant: 'success', text: __('Invitation sent.'));
     }
 
     private function populateWorkspaceData(): void
@@ -132,13 +170,18 @@ new class extends Component
             'is_personal' => $workspace->is_personal,
         ];
 
-        $this->members = $workspace->members()->get()->map(fn ($member) => [
+        $this->members = $workspace->members()
+            ->with(['employee.staffPosition', 'employee.departments'])
+            ->get()
+            ->map(fn (User $member) => [
             'id' => $member->id,
             'name' => $member->name,
             'email' => $member->email,
             'avatar' => $member->avatar ?? null,
             'role' => $member->pivot->role->value,
             'role_label' => $member->pivot->role->label(),
+            'position' => $member->employee?->staffPosition?->name ?: ($member->employee?->position ?? null),
+            'department' => $member->employee?->departments->pluck('name')->join(', ') ?: null,
         ])->toArray();
 
         $this->invitations = $workspace->invitations()
@@ -179,6 +222,31 @@ new class extends Component
     public function permissions(): WorkspacePermissions
     {
         return Auth::user()->toWorkspacePermissions($this->workspaceModel);
+    }
+
+    #[Computed]
+    public function filteredMembers(): array
+    {
+        $search = Str::of($this->memberSearch)->trim()->lower()->toString();
+
+        if ($search === '') {
+            return $this->members;
+        }
+
+        return collect($this->members)
+            ->filter(function (array $member) use ($search): bool {
+                $haystack = Str::of(trim(sprintf(
+                    '%s %s %s %s',
+                    $member['name'] ?? '',
+                    $member['email'] ?? '',
+                    $member['position'] ?? '',
+                    $member['department'] ?? '',
+                )))->lower()->toString();
+
+                return str_contains($haystack, $search);
+            })
+            ->values()
+            ->all();
     }
 }; ?>
 
@@ -251,17 +319,9 @@ new class extends Component
                     </div>
 
                     <div class="flex shrink-0 items-center gap-3 pt-1">
-                        @if ($this->permissions->canAddMember)
-                            <flux:modal.trigger name="add-existing-member">
-                                <button type="button" class="cursor-pointer text-sm font-medium text-[#013763] hover:underline dark:text-[#8dc5ff]" data-test="add-existing-member-button">
-                                    {{ __('Add from system') }}
-                                </button>
-                            </flux:modal.trigger>
-                        @endif
-
-                        @if ($this->permissions->canCreateInvitation)
-                            <flux:modal.trigger name="invite-member">
-                                <button type="button" class="cursor-pointer text-sm font-medium text-[#013763] hover:underline dark:text-[#8dc5ff]" data-test="invite-member-button">
+                        @if ($this->permissions->canAddMember || $this->permissions->canCreateInvitation)
+                            <flux:modal.trigger name="workspace-members-modal">
+                                <button type="button" class="cursor-pointer text-sm font-medium text-[#013763] hover:underline dark:text-[#8dc5ff]">
                                     {{ __('Invite') }}
                                 </button>
                             </flux:modal.trigger>
@@ -431,54 +491,169 @@ new class extends Component
         @endif
     </x-pages::settings.layout>
 
-    @if ($this->permissions->canCreateInvitation)
-        <livewire:pages::workspaces.invite-member-modal :workspace="$workspaceModel" />
-    @endif
+    @if ($this->permissions->canCreateInvitation || $this->permissions->canAddMember)
+        <flux:modal name="workspace-members-modal" :show="$errors->has('inviteEmail') || $errors->has('inviteRole') || $errors->has('existingUserId') || $errors->has('existingUserRole')" focusable class="max-w-6xl">
+            <div class="space-y-6">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <flux:heading size="lg">{{ __('Workspace participants') }} «{{ $workspaceData['name'] }}»</flux:heading>
+                        <flux:subheading>{{ __('Assign workers and control access inside this workspace.') }}</flux:subheading>
+                    </div>
 
-    @if ($this->permissions->canAddMember)
-        <flux:modal name="add-existing-member" :show="$errors->has('existingUserId') || $errors->has('existingUserRole')" focusable class="max-w-lg">
-            <form wire:submit="addExistingMember" class="space-y-5">
-                <div>
-                    <flux:heading size="lg">{{ __('Add from system') }}</flux:heading>
-                    <flux:subheading>{{ __('Select an existing user and assign a workspace role.') }}</flux:subheading>
+                    <flux:modal.close>
+                        <button type="button" class="inline-flex size-8 items-center justify-center rounded border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800" data-test="workspace-members-modal-close">
+                            <flux:icon name="x-mark" class="size-4" />
+                        </button>
+                    </flux:modal.close>
                 </div>
 
-                <x-ui.select
-                    model="existingUserId"
-                    :value="$existingUserId"
-                    :label="__('User')"
-                    :options="$availableSystemUsers"
-                    :placeholder="__('Select user')"
-                    :disabled="count($availableSystemUsers) === 0"
-                    required
-                    data-test="existing-member-user-select"
-                />
-                <flux:error name="existingUserId" />
+                <div class="space-y-4">
+                    @if ($this->permissions->canCreateInvitation)
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">
+                                {{ __('Invite employees to this workspace') }}
+                            </div>
+                            <a class="inline-flex items-center gap-1.5 text-sm font-medium text-[#013763] hover:underline dark:text-[#8dc5ff]" href="#">
+                                <flux:icon name="chat-bubble-left-right" class="size-4" />
+                                {{ __('Group chat') }} «{{ $workspaceData['name'] }}»
+                            </a>
+                        </div>
 
-                <x-ui.select
-                    model="existingUserRole"
-                    :value="$existingUserRole"
-                    :label="__('Role')"
-                    :options="collect($availableRoles)->mapWithKeys(fn ($role) => [$role['value'] => $role['label']])->all()"
-                    required
-                    data-test="existing-member-role-select"
-                />
-                <flux:error name="existingUserRole" />
+                        <form wire:submit="createInvitation" class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                            <flux:input
+                                wire:model="inviteEmail"
+                                type="email"
+                                :label="false"
+                                :placeholder="__('Enter email address')"
+                                required
+                            />
 
-                @if (count($availableSystemUsers) === 0)
-                    <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No available system users') }}</flux:text>
+                            <flux:button type="submit" variant="primary" icon="paper-airplane" class="w-full sm:w-auto" data-test="invite-member-submit">
+                                {{ __('Invite') }}
+                            </flux:button>
+                        </form>
+                        <flux:error name="inviteEmail" />
+                    @endif
+
+                    <div class="flex items-center justify-between gap-3">
+                        <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Project role management for this workspace is configured in the roles section.') }}</flux:text>
+                        <a href="{{ route('roles.index') }}" class="text-sm font-medium text-[#013763] hover:underline dark:text-[#8dc5ff]">
+                            {{ __('Role settings') }}
+                        </a>
+                    </div>
+                </div>
+
+                @if ($this->permissions->canAddMember)
+                    <div class="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+                        <flux:heading size="sm">{{ __('Add from system') }}</flux:heading>
+
+                        <form wire:submit="addExistingMember" class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_12rem_9rem]">
+                            <x-ui.select
+                                model="existingUserId"
+                                :value="$existingUserId"
+                                :label="__('User')"
+                                :options="$availableSystemUsers"
+                                :placeholder="__('Select user')"
+                                :disabled="count($availableSystemUsers) === 0"
+                                required
+                            />
+
+                            <x-ui.select
+                                model="existingUserRole"
+                                :value="$existingUserRole"
+                                :label="__('Role')"
+                                :options="collect($availableRoles)->mapWithKeys(fn ($role) => [$role['value'] => $role['label']])->all()"
+                                required
+                            />
+
+                            <flux:button type="submit" size="sm" variant="primary" :disabled="count($availableSystemUsers) === 0" class="w-full lg:w-auto">
+                                {{ __('Add member') }}
+                            </flux:button>
+                        </form>
+
+                        @if (count($availableSystemUsers) === 0)
+                            <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('No available system users') }}</flux:text>
+                        @endif
+                    </div>
                 @endif
 
-                <div class="flex items-center justify-end gap-2">
+                <div class="space-y-2">
+                    <flux:input
+                        wire:model.live.debounce.250ms="memberSearch"
+                        type="text"
+                        :label="false"
+                        :placeholder="__('Search by name, position, department')"
+                    />
+
+                    <div class="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+                        <div class="grid min-w-[640px] grid-cols-[2rem_minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,1fr)_12rem_2.5rem] items-center gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
+                            <span class="sr-only">Выбрать</span>
+                            <span>{{ __('User') }}</span>
+                            <span>{{ __('Position') }}</span>
+                            <span>{{ __('Department') }}</span>
+                            <span>{{ __('Role in workspace') }}</span>
+                            <span class="sr-only">{{ __('Actions') }}</span>
+                        </div>
+
+                        @forelse ($this->filteredMembers as $member)
+                            <div class="grid min-w-[640px] grid-cols-[2rem_minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,1fr)_12rem_2.5rem] items-center gap-3 border-b border-zinc-100 px-4 py-2.5 last:border-b-0 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-black">
+                                <label class="inline-flex size-4 items-center justify-center">
+                                    <input type="checkbox" checked disabled class="size-4 rounded border-zinc-300 bg-zinc-100 text-[#013763] dark:border-zinc-700 dark:bg-zinc-900 dark:text-[#8dc5ff]" />
+                                </label>
+
+                                <div class="min-w-0">
+                                    <div class="flex min-w-0 items-center gap-3">
+                                        <flux:avatar size="sm" :name="$member['name']" :initials="strtoupper(substr($member['name'], 0, 1))" />
+                                        <div class="min-w-0">
+                                            <div class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $member['name'] }}</div>
+                                            <flux:text class="truncate text-xs text-zinc-500 dark:text-zinc-400">{{ $member['email'] }}</flux:text>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="truncate text-sm text-zinc-700 dark:text-zinc-200">{{ $member['position'] ?: '—' }}</div>
+                                <div class="truncate text-sm text-zinc-700 dark:text-zinc-200">{{ $member['department'] ?: '—' }}</div>
+
+                                @if ($member['role'] !== 'owner' && $this->permissions->canUpdateMember)
+                                    <flux:dropdown position="bottom" align="end">
+                                        <button type="button" class="inline-flex w-full cursor-pointer items-center justify-between gap-2 rounded px-2 py-1 text-left text-sm font-medium text-[#013763] hover:bg-zinc-100 dark:text-[#8dc5ff] dark:hover:bg-zinc-900" data-test="member-role-trigger">
+                                            <span class="truncate">{{ $member['role_label'] }}</span>
+                                            <flux:icon.chevron-down class="size-3.5 shrink-0" />
+                                        </button>
+                                        <flux:menu>
+                                            @foreach ($availableRoles as $role)
+                                                <flux:menu.item
+                                                    as="button"
+                                                    type="button"
+                                                    wire:click="updateMember({{ $member['id'] }}, '{{ $role['value'] }}')"
+                                                    data-test="member-role-option"
+                                                >
+                                                    {{ $role['label'] }}
+                                                </flux:menu.item>
+                                            @endforeach
+                                        </flux:menu>
+                                    </flux:dropdown>
+                                @else
+                                    <span class="truncate px-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">{{ $member['role_label'] }}</span>
+                                @endif
+
+                                <span></span>
+                            </div>
+                        @empty
+                            <div class="px-4 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                                {{ __('No members yet') }}
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
                     <flux:modal.close>
                         <flux:button type="button" variant="ghost">{{ __('Cancel') }}</flux:button>
                     </flux:modal.close>
-
-                    <flux:button type="submit" size="sm" variant="primary" :disabled="count($availableSystemUsers) === 0" data-test="add-existing-member-submit">
-                        {{ __('Add member') }}
-                    </flux:button>
+                    <flux:button type="button" variant="primary" disabled>{{ __('Save') }}</flux:button>
                 </div>
-            </form>
+            </div>
         </flux:modal>
     @endif
 

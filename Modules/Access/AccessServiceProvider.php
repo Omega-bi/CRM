@@ -2,17 +2,15 @@
 
 namespace Modules\Access;
 
-use Illuminate\Support\ServiceProvider;
+use App\Providers\ModuleServiceProvider;
 
-class AccessServiceProvider extends ServiceProvider
+class AccessServiceProvider extends ModuleServiceProvider
 {
     /**
-     * Bootstrap the access module.
+     * Get the module name (used for view namespace).
      */
-    public function boot(): void
+    protected function moduleName(): string
     {
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
-        $this->loadViewsFrom(__DIR__.'/Resources/views', 'access');
+        return 'access';
     }
 }

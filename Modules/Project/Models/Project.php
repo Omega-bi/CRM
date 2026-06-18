@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Project\Models;
 
 use App\Enums\ProjectStatus;
 use Database\Factories\ProjectFactory;
@@ -47,8 +47,6 @@ class Project extends Model
 
     /**
      * Get the workspace that owns this project.
-     *
-     * @return BelongsTo<Workspace, $this>
      */
     public function workspace(): BelongsTo
     {
@@ -56,9 +54,7 @@ class Project extends Model
     }
 
     /**
-     * Get all project memberships.
-     *
-     * @return HasMany<ProjectMembership, $this>
+     * Get the memberships for this project.
      */
     public function memberships(): HasMany
     {
@@ -66,41 +62,18 @@ class Project extends Model
     }
 
     /**
-     * Get all users assigned to this project.
-     *
-     * @return BelongsToMany<User, $this, ProjectMembership, 'pivot'>
+     * Get the members of this project.
      */
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'project_members', 'project_id', 'user_id')
-            ->using(ProjectMembership::class)
-            ->withPivot(['workspace_id', 'role', 'access_role_id'])
-            ->withTimestamps();
+        return $this->belongsToMany(User::class, 'project_memberships', 'project_id', 'user_id');
     }
 
     /**
-     * Get customers connected to this project.
-     *
-     * @return BelongsToMany<Customer, $this>
+     * Get the customers associated with this project.
      */
     public function customers(): BelongsToMany
     {
-        return $this->belongsToMany(Customer::class, 'project_customers')
-            ->withPivot(['workspace_id', 'role'])
-            ->withTimestamps();
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => ProjectStatus::class,
-            'starts_at' => 'date',
-            'ends_at' => 'date',
-        ];
+        return $this->belongsToMany(Customer::class, 'project_customers', 'project_id', 'customer_id');
     }
 }

@@ -2,17 +2,15 @@
 
 namespace Modules\Customer;
 
-use Illuminate\Support\ServiceProvider;
+use App\Providers\ModuleServiceProvider;
 
-class CustomerServiceProvider extends ServiceProvider
+class CustomerServiceProvider extends ModuleServiceProvider
 {
     /**
-     * Bootstrap the customer module.
+     * Get the module name (used for view namespace).
      */
-    public function boot(): void
+    protected function moduleName(): string
     {
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
-        $this->loadViewsFrom(__DIR__.'/Resources/views', 'customer');
+        return 'customer';
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\ProjectRole;
-use App\Enums\WorkspaceRole;
+use Modules\Workspace\Enums\WorkspaceRole;
 use App\Models\Project;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;

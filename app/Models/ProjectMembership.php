@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 use Modules\Access\Models\Role;
+use Modules\Workspace\Models\Workspace;
 
 /**
  * @property int $id

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\EnsureWorkspaceMembership;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -28,11 +27,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         )
         ->name('security.edit');
 
-    Route::livewire('settings/workspaces', 'pages::workspaces.index')->name('workspaces.index');
-
-    Route::middleware(EnsureWorkspaceMembership::class)->group(function () {
-        Route::livewire('settings/workspaces/{workspace}', 'pages::workspaces.edit')->name('workspaces.edit');
-    });
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

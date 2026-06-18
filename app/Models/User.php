@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Concerns\HasWorkspaces;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -20,8 +18,11 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Modules\Access\Enums\RoleScope;
 use Modules\Access\Models\Role;
-use Modules\Employee\Models\Employee;
 use Modules\Customer\Models\CustomerContact;
+use Modules\Employee\Models\Employee;
+use Modules\Workspace\Concerns\HasWorkspaces;
+use Modules\Workspace\Models\Workspace;
+use Modules\Workspace\Models\WorkspaceMember;
 
 /**
  * @property int $id
@@ -35,17 +36,19 @@ use Modules\Customer\Models\CustomerContact;
  * @property string|null $remember_token
  * @property int|null $current_workspace_id
  * @property string|null $locale
+ * @property string|null $profile_photo_path
+ * @property array<int, string>|null $phone_numbers
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Workspace|null $currentWorkspace
  * @property-read Collection<int, Role> $systemRoles
  * @property-read Collection<int, Workspace> $ownedWorkspaces
- * @property-read Collection<int, WorkspaceMembership> $workspaceMemberships
+ * @property-read Collection<int, WorkspaceMember> $workspaceMemberships
  * @property-read Collection<int, Workspace> $workspaces
  * @property-read Employee|null $employee
  * @property-read CustomerContact|null $customerContact
  */
-#[Fillable(['name', 'email', 'password', 'current_workspace_id', 'locale'])]
+#[Fillable(['name', 'email', 'password', 'current_workspace_id', 'locale', 'profile_photo_path', 'phone_numbers'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -63,6 +66,7 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'phone_numbers' => 'array',
         ];
     }
 

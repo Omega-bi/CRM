@@ -2,7 +2,7 @@
 
 namespace Modules\Access\Services;
 
-use App\Enums\WorkspaceRole;
+use Modules\Workspace\Enums\WorkspaceRole;
 use App\Models\Project;
 use App\Models\User;
 use Modules\Access\Enums\SystemRoleCode;

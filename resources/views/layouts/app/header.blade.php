@@ -44,7 +44,7 @@
             <x-desktop-user-menu :showWorkspace="false" />
 
             <div class="max-lg:hidden">
-                <livewire:workspace-switcher />
+                <livewire:workspace::switcher />
             </div>
         </flux:header>
 
@@ -55,7 +55,7 @@
                 <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
-            <livewire:workspace-switcher />
+            <livewire:workspace::switcher />
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')">
@@ -79,7 +79,7 @@
 
         {{ $slot }}
 
-        <livewire:create-workspace-modal />
+        <livewire:workspace::create-modal />
 
         @persist('toast')
             <flux:toast.group>

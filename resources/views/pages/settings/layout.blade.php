@@ -16,12 +16,12 @@
 @endphp
 
 <div class="flex items-start gap-8 max-md:flex-col">
-    <nav class="w-full shrink-0 space-y-1 pb-4 text-sm md:w-[220px]" aria-label="{{ __('Settings') }}">
+    <nav class="w-full shrink-0 space-y-1.5 pb-4 text-sm md:w-[220px]" aria-label="{{ __('Settings') }}">
         @foreach ($settingsLinks as $link)
             <a
                 href="{{ route($link['route']) }}"
                 wire:navigate
-                class="block truncate border-l-2 py-1.5 pl-3 transition {{ $link['active'] ? 'border-[var(--color-brand-primary)] text-[var(--color-brand-primary)]' : 'border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100' }}"
+                class="block truncate rounded-md px-3 py-2 transition {{ $link['active'] ? 'bg-white font-medium text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100' : 'text-zinc-600 hover:bg-white hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-950 dark:hover:text-zinc-100' }}"
             >
                 {{ $link['label'] }}
             </a>

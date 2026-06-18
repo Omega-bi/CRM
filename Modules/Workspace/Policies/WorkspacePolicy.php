@@ -2,9 +2,9 @@
 
 namespace Modules\Workspace\Policies;
 
-use App\Enums\WorkspacePermission;
-use App\Models\Workspace;
 use App\Models\User;
+use Modules\Workspace\Enums\WorkspacePermission;
+use Modules\Workspace\Models\Workspace;
 
 class WorkspacePolicy
 {

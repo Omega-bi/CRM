@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
-use App\Models\WorkspaceInvitation;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\Models\Workspace;
+use Modules\Workspace\Models\WorkspaceInvitation;
 use App\Models\User;
 
 test('expired invitations are deleted by the scheduled cleanup', function () {

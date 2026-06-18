@@ -2,10 +2,10 @@
 
 namespace Modules\Workspace\Actions;
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\Models\Workspace;
 
 class CreateWorkspace
 {

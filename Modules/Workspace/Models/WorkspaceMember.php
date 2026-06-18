@@ -2,14 +2,13 @@
 
 namespace Modules\Workspace\Models;
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 use Modules\Access\Models\Role;
+use Modules\Workspace\Enums\WorkspaceRole;
 
 /**
  * @property int $id

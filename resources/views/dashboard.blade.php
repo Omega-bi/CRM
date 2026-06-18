@@ -1,5 +1,5 @@
 <x-layouts::app :title="__('Dashboard')">
-    <livewire:pages::workspaces.pending-invitations-modal />
+    <livewire:workspace::pages.pending-invitations-modal />
 
     @if (! auth()->user()->workspaces()->exists())
         <div class="fixed inset-y-0 right-0 left-0 flex items-center justify-center px-6 lg:left-64">

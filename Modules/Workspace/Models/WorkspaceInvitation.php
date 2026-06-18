@@ -2,16 +2,15 @@
 
 namespace Modules\Workspace\Models;
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
 use App\Models\User;
-use Database\Factories\WorkspaceInvitationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\database\Factories\WorkspaceInvitationFactory;
 
 /**
  * @property int $id

@@ -46,7 +46,7 @@
           'level' => 0,
         ])
       @empty
-        <div class="rounded-md bg-zinc-100 px-4 py-8 text-center text-sm text-zinc-500 dark:bg-black dark:text-zinc-400">
+        <div class="rounded-md bg-zinc-50 px-4 py-8 text-center text-sm text-zinc-500 dark:bg-black dark:text-zinc-400">
           {{ __('No departments yet') }}
         </div>
       @endforelse

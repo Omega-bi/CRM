@@ -2,8 +2,8 @@
 
 namespace Modules\Workspace\Rules;
 
-use App\Models\Workspace;
-use App\Models\WorkspaceInvitation;
+use Modules\Workspace\Models\Workspace;
+use Modules\Workspace\Models\WorkspaceInvitation;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;

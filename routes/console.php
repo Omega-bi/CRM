@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\WorkspaceInvitation;
+use Modules\Workspace\Models\WorkspaceInvitation;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {

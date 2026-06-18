@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
-use App\Models\WorkspaceInvitation;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\Models\Workspace;
+use Modules\Workspace\Models\WorkspaceInvitation;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -17,7 +17,7 @@ test('workspace invitations can be created', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.invite-member-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.invite-member-modal', ['workspace' => $workspace])
         ->set('inviteEmail', 'invited@example.com')
         ->set('inviteRole', WorkspaceRole::Member->value)
         ->call('createInvitation')
@@ -40,7 +40,7 @@ test('workspace invitations cannot be created by members', function () {
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.invite-member-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.invite-member-modal', ['workspace' => $workspace])
         ->set('inviteEmail', 'invited@example.com')
         ->set('inviteRole', WorkspaceRole::Member->value)
         ->call('createInvitation')
@@ -60,7 +60,7 @@ test('workspace invitations can be cancelled by owner', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.cancel-invitation-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.cancel-invitation-modal', ['workspace' => $workspace])
         ->set('invitationCode', $invitation->code)
         ->call('cancelInvitation')
         ->assertHasNoErrors();
@@ -86,7 +86,7 @@ test('workspace invitations can be accepted', function () {
 
     $this->actingAs($invitedUser);
 
-    $response = Livewire::test('pages::workspaces.accept-invitation', [
+    $response = Livewire::test('workspace::pages.accept-invitation', [
         'invitation' => $invitation,
     ]);
 
@@ -105,7 +105,7 @@ test('accepted invitation toast is shown on the dashboard', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.pending-invitations-modal')
+    Livewire::test('workspace::pages.pending-invitations-modal')
         ->assertDispatched('toast-show');
 });
 
@@ -124,7 +124,7 @@ test('pending invitations excludes expired invitations without deleting them', f
 
     $this->actingAs($invitedUser);
 
-    Livewire::test('pages::workspaces.pending-invitations-modal')
+    Livewire::test('workspace::pages.pending-invitations-modal')
         ->assertDontSee('Expired Workspace');
 
     $this->assertDatabaseHas('workspace_invitations', [
@@ -147,7 +147,7 @@ test('workspace invitations cannot be accepted by user that wasnt invited', func
 
     $this->actingAs($uninvitedUser);
 
-    $response = Livewire::test('pages::workspaces.accept-invitation', [
+    $response = Livewire::test('workspace::pages.accept-invitation', [
         'invitation' => $invitation,
     ]);
 
@@ -171,7 +171,7 @@ test('expired invitations cannot be accepted', function () {
 
     $this->actingAs($invitedUser);
 
-    $response = Livewire::test('pages::workspaces.accept-invitation', [
+    $response = Livewire::test('workspace::pages.accept-invitation', [
         'invitation' => $invitation,
     ]);
 

@@ -2,9 +2,9 @@
 
 use App\Enums\ProjectRole;
 use App\Enums\ProjectStatus;
-use App\Enums\WorkspaceRole;
+use Modules\Workspace\Enums\WorkspaceRole;
 use App\Models\Project;
-use App\Models\Workspace;
+use Modules\Workspace\Models\Workspace;
 use App\Models\User;
 
 test('workspace owns a portfolio of construction projects', function () {

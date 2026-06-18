@@ -1,7 +1,7 @@
 <?php
 
-use App\Enums\WorkspaceRole;
-use App\Models\Workspace;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\Models\Workspace;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -20,7 +20,7 @@ test('workspaces can be created', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->set('name', 'Test Workspace')
         ->call('createWorkspace')
         ->assertHasNoErrors();
@@ -40,7 +40,7 @@ test('workspace slug uses next available suffix', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->set('name', 'Acme')
         ->call('createWorkspace')
         ->assertHasNoErrors();
@@ -62,7 +62,7 @@ test('workspace edit page can be rendered', function () {
 
     $response->assertOk();
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->assertSeeHtml('data-test="workspace-name-input"')
         ->assertSeeHtml('data-test="invite-member-button"')
         ->assertSeeHtml('data-test="workspace-save-button"');
@@ -76,7 +76,7 @@ test('workspaces can be updated by owners', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->set('workspaceName', 'Updated Name')
         ->call('updateWorkspace')
         ->assertHasNoErrors();
@@ -97,7 +97,7 @@ test('workspaces cannot be updated by members', function () {
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->set('workspaceName', 'Updated Name')
         ->call('updateWorkspace')
         ->assertForbidden();
@@ -111,7 +111,7 @@ test('workspaces can be deleted by owners', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', $workspace->name)
         ->call('deleteWorkspace')
         ->assertHasNoErrors();
@@ -129,7 +129,7 @@ test('workspace deletion requires name confirmation', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', 'Wrong Name')
         ->call('deleteWorkspace')
         ->assertHasErrors(['deleteName']);
@@ -156,7 +156,7 @@ test('deleting current workspace switches to alphabetically first remaining work
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $zuluWorkspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $zuluWorkspace])
         ->set('deleteName', $zuluWorkspace->name)
         ->call('deleteWorkspace')
         ->assertHasNoErrors();
@@ -178,7 +178,7 @@ test('deleting current workspace falls back to personal workspace when alphabeti
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', $workspace->name)
         ->call('deleteWorkspace')
         ->assertHasNoErrors();
@@ -200,7 +200,7 @@ test('deleting non current workspace leaves current workspace unchanged', functi
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', $workspace->name)
         ->call('deleteWorkspace')
         ->assertHasNoErrors();
@@ -222,7 +222,7 @@ test('members can leave non personal workspaces', function () {
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->call('leaveWorkspace', $workspace->id)
         ->assertHasNoErrors();
 
@@ -247,7 +247,7 @@ test('leaving current workspace switches to alphabetically first remaining works
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->call('leaveWorkspace', $zuluWorkspace->id)
         ->assertHasNoErrors();
 
@@ -261,7 +261,7 @@ test('personal workspaces cannot be left', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->call('leaveWorkspace', $personalWorkspace->id)
         ->assertForbidden();
 
@@ -276,7 +276,7 @@ test('workspace owners cannot leave their workspace', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->call('leaveWorkspace', $workspace->id)
         ->assertForbidden();
 
@@ -289,7 +289,7 @@ test('users cannot leave workspaces they dont belong to', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->call('leaveWorkspace', $workspace->id)
         ->assertForbidden();
 });
@@ -304,7 +304,7 @@ test('leave control is only rendered for leaveable workspaces', function () {
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->assertSeeHtml('data-test="workspace-leave-button"');
 });
 
@@ -316,7 +316,7 @@ test('leave control is not rendered for personal or owned workspaces', function 
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.index')
+    Livewire::test('workspace::pages.index')
         ->assertDontSeeHtml('data-test="workspace-leave-button"');
 });
 
@@ -333,7 +333,7 @@ test('deleting workspace switches other affected users to their personal workspa
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', $workspace->name)
         ->call('deleteWorkspace')
         ->assertHasNoErrors();
@@ -348,7 +348,7 @@ test('personal workspaces cannot be deleted', function () {
 
     $this->actingAs($user);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $personalWorkspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $personalWorkspace])
         ->set('deleteName', $personalWorkspace->name)
         ->call('deleteWorkspace')
         ->assertForbidden();
@@ -369,7 +369,7 @@ test('workspaces cannot be deleted by non owners', function () {
 
     $this->actingAs($member);
 
-    Livewire::test('pages::workspaces.delete-workspace-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.delete-workspace-modal', ['workspace' => $workspace])
         ->set('deleteName', $workspace->name)
         ->call('deleteWorkspace')
         ->assertForbidden();

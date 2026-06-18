@@ -2,7 +2,7 @@
 
 use App\Enums\ProjectRole;
 use App\Models\Project;
-use App\Models\Workspace;
+use Modules\Workspace\Models\Workspace;
 use Modules\Access\Actions\AssignProjectRole;
 use Modules\Access\Actions\CreatePermission;
 use Modules\Access\Actions\CreateRole;

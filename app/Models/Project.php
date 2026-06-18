@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Modules\Customer\Models\Customer;
+use Modules\Workspace\Models\Workspace;
 
 /**
  * @property int $id

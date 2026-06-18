@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
-use App\Http\Middleware\SetWorkspaceUrlDefaults;
+use Modules\Workspace\Middleware\SetWorkspaceUrlDefaults;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;

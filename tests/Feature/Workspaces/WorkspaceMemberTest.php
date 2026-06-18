@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\WorkspaceRole;
+use Modules\Workspace\Enums\WorkspaceRole;
 use App\Models\User;
-use App\Models\Workspace;
+use Modules\Workspace\Models\Workspace;
 use Livewire\Livewire;
 
 test('workspace member role can be updated by owner', function () {
@@ -15,7 +15,7 @@ test('workspace member role can be updated by owner', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->call('updateMember', $member->id, WorkspaceRole::Admin->value)
         ->assertHasNoErrors();
 
@@ -31,7 +31,7 @@ test('existing system user can be added to workspace by owner', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->set('existingUserId', (string) $existingUser->id)
         ->set('existingUserRole', WorkspaceRole::Member->value)
         ->call('addExistingMember')
@@ -55,7 +55,7 @@ test('existing system user cannot be added to workspace by non owner', function 
 
     $this->actingAs($admin);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->set('existingUserId', (string) $existingUser->id)
         ->set('existingUserRole', WorkspaceRole::Member->value)
         ->call('addExistingMember')
@@ -76,7 +76,7 @@ test('workspace member role cannot be updated by non owner', function () {
 
     $this->actingAs($admin);
 
-    Livewire::test('pages::workspaces.edit', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.edit', ['workspace' => $workspace])
         ->call('updateMember', $member->id, WorkspaceRole::Admin->value)
         ->assertForbidden();
 });
@@ -91,7 +91,7 @@ test('workspace member can be removed by owner', function () {
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.remove-member-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.remove-member-modal', ['workspace' => $workspace])
         ->set('memberId', $member->id)
         ->call('removeMember')
         ->assertHasNoErrors();
@@ -111,7 +111,7 @@ test('workspace member cannot be removed by non owners', function () {
 
     $this->actingAs($admin);
 
-    Livewire::test('pages::workspaces.remove-member-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.remove-member-modal', ['workspace' => $workspace])
         ->set('memberId', $member->id)
         ->call('removeMember')
         ->assertForbidden();
@@ -130,7 +130,7 @@ test('removed members current workspace is set to personal workspace', function 
 
     $this->actingAs($owner);
 
-    Livewire::test('pages::workspaces.remove-member-modal', ['workspace' => $workspace])
+    Livewire::test('workspace::pages.remove-member-modal', ['workspace' => $workspace])
         ->set('memberId', $member->id)
         ->call('removeMember')
         ->assertHasNoErrors();

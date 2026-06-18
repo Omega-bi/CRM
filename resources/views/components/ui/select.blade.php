@@ -57,7 +57,7 @@
       x-on:keydown.enter.prevent="open = !open"
       x-bind:aria-expanded="open"
       @disabled($disabled)
-      class="{{ $buttonHeight }} flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-zinc-300 bg-white px-3 text-left text-zinc-900 shadow-none transition disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:disabled:bg-zinc-800"
+      class="{{ $buttonHeight }} flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-zinc-300 bg-white px-3 text-left text-zinc-900 shadow-none transition disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:disabled:bg-zinc-800"
       :class="open ? 'border-[var(--color-brand-primary)] ring-1 ring-[color-mix(in_oklab,var(--color-brand-primary),transparent_72%)]' : 'hover:border-[#a5c8fe]'"
       role="combobox"
       aria-haspopup="listbox"

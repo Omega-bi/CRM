@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\ProjectStatus;
 use App\Models\Project;
-use App\Models\Workspace;
+use Modules\Workspace\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -2,13 +2,8 @@
 
 namespace Modules\Workspace\Models;
 
-use App\Concerns\GeneratesUniqueWorkspaceSlugs;
-use App\Enums\WorkspaceRole;
-use App\Models\WorkspaceMembership;
 use App\Models\Project;
-use App\Models\WorkspaceInvitation;
 use App\Models\User;
-use Database\Factories\WorkspaceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Modules\Workspace\Concerns\GeneratesUniqueWorkspaceSlugs;
+use Modules\Workspace\Enums\WorkspaceRole;
+use Modules\Workspace\database\Factories\WorkspaceFactory;
 
 /**
  * @property int $id
@@ -27,7 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property-read Collection<int, WorkspaceInvitation> $invitations
- * @property-read Collection<int, WorkspaceMembership> $memberships
+ * @property-read Collection<int, WorkspaceMember> $memberships
  * @property-read Collection<int, User> $members
  * @property-read Collection<int, Project> $projects
  */
@@ -85,12 +83,12 @@ class Workspace extends Model
     /**
      * Get all members of this workspace.
      *
-     * @return BelongsToMany<User, $this, WorkspaceMembership, 'pivot'>
+     * @return BelongsToMany<User, $this, WorkspaceMember, 'pivot'>
      */
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members', 'workspace_id', 'user_id')
-            ->using(WorkspaceMembership::class)
+            ->using(WorkspaceMember::class)
             ->withPivot(['role', 'access_role_id'])
             ->withTimestamps();
     }
@@ -98,11 +96,11 @@ class Workspace extends Model
     /**
      * Get all memberships for this workspace.
      *
-     * @return HasMany<WorkspaceMembership, $this>
+     * @return HasMany<WorkspaceMember, $this>
      */
     public function memberships(): HasMany
     {
-        return $this->hasMany(WorkspaceMembership::class, 'workspace_id');
+        return $this->hasMany(WorkspaceMember::class, 'workspace_id');
     }
 
     /**

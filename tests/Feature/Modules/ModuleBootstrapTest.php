@@ -1,9 +1,5 @@
 <?php
 
-use App\Actions\Workspaces\CreateWorkspace as AppCreateWorkspace;
-use App\Policies\WorkspacePolicy as AppWorkspacePolicy;
-use App\Rules\UniqueWorkspaceInvitation as AppUniqueWorkspaceInvitation;
-use App\Rules\WorkspaceName as AppWorkspaceName;
 use Modules\Access\AccessServiceProvider;
 use Modules\Access\Actions\AssignProjectRole;
 use Modules\Access\Actions\AssignSystemRole;
@@ -72,13 +68,6 @@ test('business modules are autoloaded', function () {
         ->and(class_exists(PermissionResolver::class))->toBeTrue()
         ->and(class_exists(CreateEmployee::class))->toBeTrue()
         ->and(class_exists(GrantEmployeeSystemAccess::class))->toBeTrue();
-});
-
-test('legacy workspace app classes remain available', function () {
-    expect(class_exists(AppCreateWorkspace::class))->toBeTrue()
-        ->and(class_exists(AppWorkspacePolicy::class))->toBeTrue()
-        ->and(class_exists(AppWorkspaceName::class))->toBeTrue()
-        ->and(class_exists(AppUniqueWorkspaceInvitation::class))->toBeTrue();
 });
 
 test('module models point to current database tables', function () {

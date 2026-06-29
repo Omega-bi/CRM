@@ -10,7 +10,7 @@
     : ($title ?? __('Dashboard'));
 @endphp
 
-<body class="min-h-screen bg-zinc-50 dark:bg-black">
+<body class="h-screen overflow-hidden bg-zinc-50 dark:bg-black">
   <flux:sidebar sticky collapsible="mobile"
     class="border-e border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
     <flux:sidebar.header>
@@ -44,7 +44,7 @@
     <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
   </flux:sidebar>
 
-  <flux:header class="h-12 gap-3 border-b border-zinc-200 bg-white px-6 lg:px-8 dark:border-zinc-800 dark:bg-black">
+  <flux:header sticky class="h-12 gap-3 border-b border-zinc-200 bg-white px-6 lg:px-8 dark:border-zinc-800 dark:bg-black">
     <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
     <h1 class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">

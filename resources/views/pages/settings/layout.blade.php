@@ -15,8 +15,8 @@
     ];
 @endphp
 
-<div class="flex items-start gap-8 max-md:flex-col">
-    <nav class="w-full shrink-0 space-y-1.5 pb-4 text-sm md:w-[220px]" aria-label="{{ __('Settings') }}">
+<div class="flex h-full min-h-0 items-start gap-8 max-md:flex-col md:items-stretch">
+    <nav class="w-full shrink-0 space-y-1.5 overflow-y-auto pb-4 text-sm md:sticky md:top-0 md:h-full md:max-h-full md:w-[220px]" aria-label="{{ __('Settings') }}">
         @foreach ($settingsLinks as $link)
             <a
                 href="{{ route($link['route']) }}"
@@ -30,7 +30,7 @@
 
     <flux:separator class="md:hidden" />
 
-    <div class="flex-1 self-stretch">
+    <div class="flex min-h-0 flex-1 flex-col">
         @if ($heading)
             <flux:heading>{{ $heading }}</flux:heading>
         @endif
@@ -39,8 +39,10 @@
             <flux:subheading>{{ $subheading }}</flux:subheading>
         @endif
 
-        <div class="w-full {{ $fullWidth ? 'max-w-none' : 'max-w-lg' }}">
-            {{ $slot }}
+        <div class="flex-1 w-full min-h-0 overflow-hidden {{ $fullWidth ? 'max-w-none' : 'max-w-lg' }}">
+            <div class="h-full min-h-0">
+                {{ $slot }}
+            </div>
         </div>
     </div>
 </div>

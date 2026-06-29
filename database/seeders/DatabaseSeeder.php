@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
         $syncAccessDefaults->handle();
 
         // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',

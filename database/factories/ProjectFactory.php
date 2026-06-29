@@ -4,14 +4,21 @@ namespace Database\Factories;
 
 use App\Enums\ProjectStatus;
 use App\Models\Project;
-use Modules\Workspace\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Workspace\Models\Workspace;
 
 /**
  * @extends Factory<Project>
  */
 class ProjectFactory extends Factory
 {
+    /**
+     * The name of the model's factory.
+     *
+     * @var string
+     */
+    protected $model = Project::class;
+
     /**
      * Define the model's default state.
      *
@@ -20,16 +27,10 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'workspace_id' => Workspace::factory(),
-            'name' => fake()->randomElement([
-                'School Construction',
-                'Dam Construction',
-                'Residential Building Construction',
-            ]),
-            'description' => fake()->optional()->sentence(),
+            'name' => $this->faker->company,
+            'slug' => $this->faker->slug,
             'status' => ProjectStatus::Planned,
-            'starts_at' => fake()->optional()->dateTimeBetween('-1 month', '+1 month'),
-            'ends_at' => fake()->optional()->dateTimeBetween('+2 months', '+18 months'),
+            'workspace_id' => Workspace::factory(),
         ];
     }
 }

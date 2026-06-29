@@ -226,11 +226,7 @@ new #[Title('Profile settings')] class extends Component {
 }; ?>
 
 <section class="w-full">
-  @include('partials.settings-heading')
-
-  <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
-
-  <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Manage your personal information and account settings')" :full-width="true">
+  <x-pages::settings.layout :full-width="true">
     @php
       $user = Auth::user();
       $profilePosition = $user->employee?->position ?? $user->customerContact?->position;
@@ -250,7 +246,7 @@ new #[Title('Profile settings')] class extends Component {
     <div x-data="{
                 notifications: true,
                 appearanceLabels: @js($appearanceOptions),
-            }" class="mt-4 w-full max-w-none">
+            }" class="w-full max-w-none">
       <form wire:submit="updateProfileInformation" class="grid w-full gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside class="min-w-0 rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
           <label

@@ -15,53 +15,62 @@
     </div>
 
     <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-      <div class="flex items-start gap-4">
-        <div class="relative flex size-16 shrink-0 items-center justify-center">
+      <div class="flex items-start gap-5">
+        <div class="relative flex h-48 w-36 shrink-0 items-center justify-center">
           <flux:avatar
             :name="$this->editing_employee_full_name ?: $this->editing_employee_email"
-            circle
             size="lg"
             color="auto"
             :color:seed="$this->editing_employee_email ?: $this->editing_employee_full_name"
             tooltip
-            class="size-14 text-base font-semibold shadow-sm ring-1 ring-slate-200 dark:ring-zinc-800"
+            class="h-48 w-36 rounded-lg text-3xl font-semibold shadow-sm ring-1 ring-slate-200 dark:ring-zinc-800"
           />
 
-          <span class="absolute bottom-1 left-1 size-4 rounded-full border-2 border-white bg-lime-500 shadow-sm dark:border-zinc-950"></span>
+          <span class="absolute bottom-2 left-2 size-4 rounded-full border-2 border-white bg-lime-500 shadow-sm dark:border-zinc-950"></span>
         </div>
 
         <div class="min-w-0 flex-1 space-y-2.5 text-sm">
           @php
-            $inlineInputClass = 'min-w-0 flex-1 appearance-none border-0 border-b border-slate-200 bg-transparent px-1 py-0.5 text-sm text-zinc-700 shadow-none outline-none transition focus:border-[#1f8fff] focus:outline-none focus:ring-0 dark:border-zinc-700 dark:text-zinc-200 dark:focus:border-[#1f8fff]';
+            $inlineInputClass = 'ml-auto min-w-0 w-full max-w-[420px] flex-none appearance-none !rounded-none !border-x-0 !border-t-0 !border-b !border-slate-200 bg-transparent px-1 py-0.5 text-right text-sm text-zinc-700 !shadow-none outline-none transition placeholder:text-right focus:!border-x-0 focus:!border-t-0 focus:!border-b focus:!border-[#1f8fff] focus:!ring-0 focus:outline-none dark:!border-zinc-700 dark:text-zinc-200 dark:focus:!border-[#1f8fff]';
+            $detailRowClass = 'flex min-w-0 items-center justify-between gap-6';
+            $detailLabelClass = 'flex shrink-0 items-center gap-2 text-zinc-700 dark:text-zinc-300';
           @endphp
 
-          <label class="flex items-center gap-2">
-            <flux:icon name="briefcase" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
-            <span class="shrink-0 text-zinc-700 dark:text-zinc-300">{{ __('Position') }}:</span>
-            <span class="min-w-0 flex-1 truncate border-b border-slate-200 px-1 py-0.5 text-sm text-[#1f8fff] dark:border-zinc-700">
+          <label class="{{ $detailRowClass }}">
+            <span class="{{ $detailLabelClass }}">
+              <flux:icon name="briefcase" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
+              <span>{{ __('Position') }}:</span>
+            </span>
+            <span class="ml-auto min-w-0 w-full max-w-[420px] flex-none truncate !rounded-none !border-x-0 !border-t-0 !border-b !border-slate-200 px-1 py-0.5 text-right text-sm text-[#1f8fff] dark:!border-zinc-700">
               {{ $this->editingEmployeePositionLabel }}
             </span>
           </label>
 
-          <label class="flex items-center gap-2">
-            <flux:icon name="at-symbol" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
-            <span class="shrink-0 text-zinc-700 dark:text-zinc-300">{{ __('Email') }}:</span>
+          <label class="{{ $detailRowClass }}">
+            <span class="{{ $detailLabelClass }}">
+              <flux:icon name="at-symbol" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
+              <span>{{ __('Email') }}:</span>
+            </span>
             <input wire:model.live.blur="editing_employee_email" type="email"
               placeholder="{{ __('Enter email address') }}"
               class="{{ $inlineInputClass }} placeholder:text-slate-400" />
           </label>
 
-          <label class="flex items-center gap-2">
-            <flux:icon name="phone" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
-            <span class="shrink-0 text-zinc-700 dark:text-zinc-300">{{ __('Phone') }}:</span>
+          <label class="{{ $detailRowClass }}">
+            <span class="{{ $detailLabelClass }}">
+              <flux:icon name="phone" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
+              <span>{{ __('Phone') }}:</span>
+            </span>
             <input wire:model.live.blur="editing_employee_phone" type="text"
               placeholder="{{ __('Enter phone number') }}"
               class="{{ $inlineInputClass }} placeholder:text-slate-400" />
           </label>
 
-          <label class="flex items-center gap-2">
-            <flux:icon name="user" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
-            <span class="shrink-0 text-zinc-700 dark:text-zinc-300">{{ __('Full name') }}:</span>
+          <label class="{{ $detailRowClass }}">
+            <span class="{{ $detailLabelClass }}">
+              <flux:icon name="user" class="size-4 shrink-0 text-slate-300 dark:text-slate-600" />
+              <span>{{ __('Full name') }}:</span>
+            </span>
             <input wire:model.live.blur="editing_employee_full_name" type="text"
               placeholder="{{ __('Enter full name') }}"
               class="{{ $inlineInputClass }} placeholder:text-slate-400" />
@@ -95,7 +104,7 @@
       <section>
         <h3 class="text-lg font-semibold text-zinc-800 dark:text-zinc-100">{{ __('Departments membership') }}:</h3>
 
-        <div class="mt-4 h-[168px] overflow-y-auto pr-1">
+        <div class="mt-4 min-h-[168px] overflow-visible pr-1">
           <div class="grid grid-cols-[minmax(0,1fr)_220px] gap-x-4 gap-y-2 text-sm">
             <div class="sticky top-0 z-10 bg-white pb-1 pl-6 text-xs text-slate-300 dark:bg-zinc-950">
               {{ __('Department name') }}

@@ -1071,10 +1071,6 @@ new #[Title('Workers settings')] class extends Component {
 }; ?>
 
 <section class="w-full">
-  @include('partials.settings-heading')
-
-  <flux:heading class="sr-only">{{ __('Workers') }}</flux:heading>
-
   <x-pages::settings.layout fullWidth>
     @include('components.settings.workers.departments-section')
 

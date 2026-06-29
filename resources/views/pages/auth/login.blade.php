@@ -1,15 +1,11 @@
-<x-layouts::auth :title="__('Log in')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
-
+<x-layouts::auth :title="__('Log in')" :show-logo="false">
+    <div class="flex flex-col gap-6 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
         @if ($workspaceInvitation)
             <x-workspace-invitation-alert :invitation="$workspaceInvitation" :action="__('Log in')" />
         @endif
-
-        <x-passkey-verify />
 
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
             @csrf
@@ -65,5 +61,7 @@
                 {{ __('Sign up') }}
             </flux:link>
         </div>
+
+        <x-passkey-verify />
     </div>
 </x-layouts::auth>

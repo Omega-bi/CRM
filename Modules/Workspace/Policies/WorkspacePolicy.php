@@ -95,6 +95,6 @@ class WorkspacePolicy
      */
     public function delete(User $user, Workspace $workspace): bool
     {
-        return ! $workspace->is_personal && $user->hasWorkspacePermission($workspace, WorkspacePermission::DeleteWorkspace);
+        return $user->hasWorkspacePermission($workspace, WorkspacePermission::DeleteWorkspace);
     }
 }

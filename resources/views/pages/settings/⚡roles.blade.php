@@ -274,19 +274,11 @@ new #[Title('Roles & permissions')] class extends Component {
 }; ?>
 
 <section class="w-full h-full min-h-0">
-  @include('partials.settings-heading')
-
-  <flux:heading class="sr-only">{{ __('Roles & permissions') }}</flux:heading>
-
-  <x-pages::settings.layout :heading="__('Roles & permissions')" :subheading="__('Create roles and assign precise access rights')" :full-width="true">
+  <x-pages::settings.layout :full-width="true" :content-scroll="false">
     <form wire:submit="savePermissions" class="grid w-full gap-4 xl:grid-cols-[320px_minmax(0,1fr)] h-full min-h-0">
       <aside
         class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-md border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div class="flex items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
-          <div class="min-w-0">
-            <flux:heading size="lg">{{ __('Roles') }}</flux:heading>
-          </div>
-
           <flux:modal.trigger name="create-role">
             <button type="button" wire:click="createNewRole"
               class="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[#006de5] hover:underline dark:text-[#8dc5ff]"
@@ -329,11 +321,6 @@ new #[Title('Roles & permissions')] class extends Component {
         class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-md border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div
           class="flex items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-700 flex-shrink-0">
-          <div class="min-w-0">
-            <flux:heading size="lg">{{ __('Permissions') }}</flux:heading>
-            <flux:text class="text-xs">{{ __('Select only the actions this role should allow') }}</flux:text>
-          </div>
-
           @if ($editing_role_id)
             <div class="flex items-center gap-2">
               <flux:text class="text-xs text-zinc-500">{{ __('Selected') }}</flux:text>
@@ -404,7 +391,6 @@ new #[Title('Roles & permissions')] class extends Component {
       focusable class="max-w-lg">
       <form wire:submit="createRole" class="space-y-5">
         <div class="space-y-1">
-          <flux:heading size="lg">{{ __('Add role') }}</flux:heading>
           <flux:subheading>{{ __('Set a clear role name and a short description') }}</flux:subheading>
         </div>
 
@@ -437,7 +423,6 @@ new #[Title('Roles & permissions')] class extends Component {
       focusable class="max-w-lg">
       <form wire:submit="updateRole" class="space-y-5">
         <div class="space-y-1">
-          <flux:heading size="lg">{{ __('Edit role') }}</flux:heading>
           <flux:subheading>{{ __('Update the role name and short description') }}</flux:subheading>
         </div>
 

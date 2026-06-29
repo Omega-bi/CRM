@@ -17,7 +17,7 @@ new class extends Component {
 
   public function mount(): void
   {
-    $this->locale = Auth::user()->locale ?? app()->getLocale();
+    $this->locale = Auth::user()?->locale ?? session('locale', app()->getLocale());
   }
 
   public function switchLocale(string $locale): void
@@ -28,7 +28,12 @@ new class extends Component {
     )->validate();
 
     $user = Auth::user();
-    $user->forceFill(['locale' => $validated['locale']])->save();
+
+    if ($user) {
+        $user->forceFill(['locale' => $validated['locale']])->save();
+    } else {
+        session(['locale' => $validated['locale']]);
+    }
 
     app()->setLocale($validated['locale']);
 
